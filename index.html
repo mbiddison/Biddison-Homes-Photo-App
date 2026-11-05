@@ -30,7 +30,6 @@
     .address-list { margin-top: 10px; max-height: 150px; overflow-y: auto; }
     .address-item { display: flex; justify-content: space-between; align-items: center; padding: 8px; background: #f1f5f9; border-radius: 4px; margin-bottom: 6px; font-size: 0.85rem; }
     
-    /* Dual Button Section for Android & iPhone */
     .photo-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
     .btn-action { background: #eff6ff; border: 2px dashed var(--primary); color: var(--primary); padding: 18px 10px; text-align: center; border-radius: 8px; font-weight: 600; font-size: 0.95rem; cursor: pointer; }
     .btn-action:hover { background: #dbeafe; }
@@ -76,7 +75,7 @@
     </label>
     <label class="btn-action">
       🖼️ Photo Library
-      <input type="file" id="galleryInput" accept="image/*" multiple onchange="handlePhotosSelected(event)">
+      <input type="file" id="galleryInput" accept="image/*,.jpg,.jpeg,.png,.heic,.webp" multiple onchange="handlePhotosSelected(event)">
     </label>
   </div>
 
