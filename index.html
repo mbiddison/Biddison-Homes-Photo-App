@@ -29,9 +29,13 @@
     button.danger { background: var(--danger); padding: 6px 10px; font-size: 0.8rem; }
     .address-list { margin-top: 10px; max-height: 150px; overflow-y: auto; }
     .address-item { display: flex; justify-content: space-between; align-items: center; padding: 8px; background: #f1f5f9; border-radius: 4px; margin-bottom: 6px; font-size: 0.85rem; }
-    .file-input-wrapper { border: 2px dashed var(--primary); border-radius: 8px; padding: 24px 16px; text-align: center; background: #eff6ff; cursor: pointer; margin-bottom: 16px; }
-    .file-input-wrapper input { display: none; }
-    .file-input-wrapper p { font-size: 0.95rem; font-weight: 600; color: var(--primary); }
+    
+    /* Dual Button Section for Android & iPhone */
+    .photo-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+    .btn-action { background: #eff6ff; border: 2px dashed var(--primary); color: var(--primary); padding: 18px 10px; text-align: center; border-radius: 8px; font-weight: 600; font-size: 0.95rem; cursor: pointer; }
+    .btn-action:hover { background: #dbeafe; }
+    .btn-action input { display: none; }
+
     .photo-grid { display: flex; flex-direction: column; gap: 16px; }
     .photo-card { display: flex; gap: 12px; background: #fff; border: 1px solid var(--border); padding: 10px; border-radius: 6px; align-items: center; }
     .photo-card img { width: 80px; height: 80px; object-fit: cover; border-radius: 4px; border: 1px solid var(--border); }
@@ -64,9 +68,16 @@
     <div class="address-list" id="savedAddressList"></div>
   </div>
 
-  <div class="file-input-wrapper" onclick="document.getElementById('photoInput').click()">
-    <p>📷 Tap to Open Camera / Select Photos</p>
-    <input type="file" id="photoInput" accept="image/*" multiple onchange="handlePhotosSelected(event)">
+  <!-- Dual Photo Input Buttons -->
+  <div class="photo-actions">
+    <label class="btn-action">
+      📷 Take Photo
+      <input type="file" id="cameraInput" accept="image/*" capture="environment" onchange="handlePhotosSelected(event)">
+    </label>
+    <label class="btn-action">
+      🖼️ Photo Library
+      <input type="file" id="galleryInput" accept="image/*" multiple onchange="handlePhotosSelected(event)">
+    </label>
   </div>
 
   <div id="photoGrid" class="photo-grid"></div>
@@ -157,6 +168,7 @@
       files.forEach(file => {
         const reader = new FileReader();
         reader.onload = function(evt) {
+          const fileIndex = selectedFiles.length;
           const fileObj = { file, dataUrl: evt.target.result, description: '' };
           selectedFiles.push(fileObj);
 
@@ -165,13 +177,16 @@
           card.innerHTML = `
             <img src="${evt.target.result}" alt="Preview">
             <div class="photo-card-body">
-              <textarea placeholder="Add photo description..." onchange="updateDesc(${selectedFiles.length - 1}, this.value)"></textarea>
+              <textarea placeholder="Add photo description..." onchange="updateDesc(${fileIndex}, this.value)"></textarea>
             </div>
           `;
           grid.appendChild(card);
         };
         reader.readAsDataURL(file);
       });
+      
+      // Reset input value so re-selecting the same file works smoothly
+      e.target.value = '';
     }
 
     function updateDesc(index, text) {
@@ -193,7 +208,6 @@
       }
       status.style.color = "#059669";
       status.textContent = `Uploading ${selectedFiles.length} photo(s) to folder: "${addr}"...`;
-      // Here we would trigger the Google Apps Script endpoint post request.
     }
 
     renderAddresses();
