@@ -89,7 +89,7 @@
   <div id="status" class="status-msg"></div>
 
   <script>
-    // PASTE YOUR DEPLOYED GOOGLE APPS SCRIPT WEB APP URL HERE:
+    // PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL HERE:
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzuIX4yEstQRBLcDCIcNP6AqBy2t6FzZYHelSiX2BCdtpo6NyI0LveIkrNkvvYcASgQ/exec";
 
     let addresses = JSON.parse(localStorage.getItem('job_addresses')) || [
@@ -240,8 +240,6 @@
         if (result.status === "success") {
           status.style.color = "#059669";
           status.textContent = result.message;
-          
-          // Clear previews after successful upload
           selectedFiles = [];
           document.getElementById('photoGrid').innerHTML = '';
         } else {
@@ -250,4 +248,13 @@
         }
       } catch (err) {
         status.style.color = "#ef4444";
-        status.textContent = "Error uploading: " + err.toString
+        status.textContent = "Error uploading: " + err.toString();
+      } finally {
+        uploadBtn.disabled = false;
+      }
+    }
+
+    renderAddresses();
+  </script>
+</body>
+</html>
