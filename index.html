@@ -76,7 +76,7 @@
     </label>
     <label class="btn-action">
       🖼️ Photo Library
-      <input type="file" id="galleryInput" accept="image/*" multiple onchange="handlePhotosSelected(event)">
+      <input type="file" id="galleryInput" accept="image/jpeg,image/png,image/heic,image/webp,image/*" multiple onchange="handlePhotosSelected(event)">
     </label>
   </div>
 
@@ -185,7 +185,6 @@
         reader.readAsDataURL(file);
       });
       
-      // Reset input value so re-selecting the same file works smoothly
       e.target.value = '';
     }
 
