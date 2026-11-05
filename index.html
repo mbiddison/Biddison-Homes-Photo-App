@@ -25,6 +25,7 @@
     select, input[type="text"] { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.95rem; background: #fff; }
     button { background: var(--primary); color: white; border: none; padding: 10px 14px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.9rem; transition: background 0.2s; }
     button:hover { background: var(--primary-hover); }
+    button:disabled { background: #94a3b8; cursor: not-allowed; }
     button.secondary { background: #64748b; }
     button.danger { background: var(--danger); padding: 6px 10px; font-size: 0.8rem; }
     .address-list { margin-top: 10px; max-height: 150px; overflow-y: auto; }
@@ -40,7 +41,7 @@
     .photo-card img { width: 80px; height: 80px; object-fit: cover; border-radius: 4px; border: 1px solid var(--border); }
     .photo-card-body { flex: 1; }
     .photo-card-body textarea { width: 100%; height: 60px; padding: 6px; border: 1px solid var(--border); border-radius: 4px; font-size: 0.85rem; resize: none; }
-    .status-msg { text-align: center; font-size: 0.9rem; margin-top: 12px; font-weight: 600; color: #059669; }
+    .status-msg { text-align: center; font-size: 0.9rem; margin-top: 12px; font-weight: 600; color: #059669; word-break: break-word; }
   </style>
 </head>
 <body>
@@ -82,12 +83,15 @@
   <div id="photoGrid" class="photo-grid"></div>
 
   <div style="margin-top: 20px;">
-    <button type="button" style="width: 100%; padding: 14px; font-size: 1rem;" onclick="uploadPhotos()">Upload Catalog to Google Drive</button>
+    <button type="button" id="uploadBtn" style="width: 100%; padding: 14px; font-size: 1rem;" onclick="uploadPhotos()">Upload Catalog to Google Drive</button>
   </div>
 
   <div id="status" class="status-msg"></div>
 
   <script>
+    // PASTE YOUR DEPLOYED GOOGLE APPS SCRIPT WEB APP URL HERE:
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzuIX4yEstQRBLcDCIcNP6AqBy2t6FzZYHelSiX2BCdtpo6NyI0LveIkrNkvvYcASgQ/exec";
+
     let addresses = JSON.parse(localStorage.getItem('job_addresses')) || [
       "1245 Phantom Rider Trail",
       "1061 Rainbow Drive",
@@ -173,6 +177,7 @@
 
           const card = document.createElement('div');
           card.className = 'photo-card';
+          card.id = `photo-card-${fileIndex}`;
           card.innerHTML = `
             <img src="${evt.target.result}" alt="Preview">
             <div class="photo-card-body">
@@ -193,9 +198,11 @@
       }
     }
 
-    function uploadPhotos() {
+    async function uploadPhotos() {
       const addr = document.getElementById('addressSelect').value || document.getElementById('newAddress').value;
       const status = document.getElementById('status');
+      const uploadBtn = document.getElementById('uploadBtn');
+
       if (!addr) {
         alert("Please select or enter a job address first.");
         return;
@@ -204,11 +211,43 @@
         alert("Please select at least one photo to upload.");
         return;
       }
-      status.style.color = "#059669";
-      status.textContent = `Uploading ${selectedFiles.length} photo(s) to folder: "${addr}"...`;
-    }
+      if (SCRIPT_URL === "YOUR_APPS_SCRIPT_WEB_APP_URL_HERE") {
+        alert("Please paste your Google Apps Script Web App URL into the code first.");
+        return;
+      }
 
-    renderAddresses();
-  </script>
-</body>
-</html>
+      uploadBtn.disabled = true;
+      status.style.color = "#1e3a8a";
+      status.textContent = `Uploading ${selectedFiles.length} photo(s) to "${addr}"... Please wait.`;
+
+      const payload = {
+        address: addr,
+        photos: selectedFiles.map(item => ({
+          dataUrl: item.dataUrl,
+          description: item.description
+        }))
+      };
+
+      try {
+        const response = await fetch(SCRIPT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+
+        if (result.status === "success") {
+          status.style.color = "#059669";
+          status.textContent = result.message;
+          
+          // Clear previews after successful upload
+          selectedFiles = [];
+          document.getElementById('photoGrid').innerHTML = '';
+        } else {
+          status.style.color = "#ef4444";
+          status.textContent = "Upload failed: " + result.message;
+        }
+      } catch (err) {
+        status.style.color = "#ef4444";
+        status.textContent = "Error uploading: " + err.toString
