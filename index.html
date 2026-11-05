@@ -75,7 +75,7 @@
     </label>
     <label class="btn-action">
       🖼️ Photo Library
-      <input type="file" id="galleryInput" accept="image/*,.jpg,.jpeg,.png,.heic,.webp" multiple onchange="handlePhotosSelected(event)">
+      <input type="file" id="galleryInput" accept="image/*,application/pdf" multiple onchange="handlePhotosSelected(event)">
     </label>
   </div>
 
@@ -161,7 +161,7 @@
     }
 
     function handlePhotosSelected(e) {
-      const files = Array.from(e.target.files);
+      const files = Array.from(e.target.files).filter(f => f.type.startsWith('image/'));
       const grid = document.getElementById('photoGrid');
 
       files.forEach(file => {
